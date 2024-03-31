@@ -15,7 +15,8 @@ mkdir -p PCM/archive/resources
 echo "Copy files to destination"
 cp VERSION PCM/archive
 cp -r plugins PCM/archive
-cp PCM/icon.png PCM/archive/resources
+cp resources/icon_32p.png PCM/archive/plugins/connect.png
+cp resources/icon_64p.png PCM/archive/resources/icon.png
 cp PCM/metadata.template.json PCM/archive/metadata.json
 
 echo "Write version info to file"
