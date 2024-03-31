@@ -1,5 +1,5 @@
 # This file is published under MIT License
-# Copyright (c) 2024 Pablo Martínez (elpekenin)
+# Copyright (c) 2024 Pablo Martinez (elpekenin)
 
 from pathlib import Path
 from typing import Optional, Tuple
@@ -103,8 +103,8 @@ def line_factory(track: TrackProxy):
 def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Point]:
     """Find the intersection of two tracks."""
 
-    line_a = LineFactory(track_a)
-    line_b = LineFactory(track_a)
+    line_a = line_factory(track_a)
+    line_b = line_factory(track_b)
 
     if isinstance(line_a, Horizontal) and isinstance(line_b, Horizontal):
         return None
