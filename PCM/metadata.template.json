@@ -1,0 +1,33 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "connect-traces",
+    "description": "A KiCAD plugin to connect two random traces",
+    "description_full": "This plugin connects two traces with one another by extending or shortening both until they intersect.",
+    "identifier": "com.github.ebastler.connect-traces",
+    "type": "plugin",
+    "author": {
+        "name": "elpekenin",
+        "contact": {
+            "discord": "https://discord.gg/UEhmQbQw"
+        }
+    },
+    "maintainer": {
+        "name": "elpekenin and ebastler",
+        "contact": {
+            "discord": "https://discord.gg/UEhmQbQw"
+        }
+    },
+    "license": "MIT",
+    "resources": {
+        "homepage": "https://github.com/ebastler/connect-traces"
+    },
+    "versions": [{
+        "version": "VERSION_HERE",
+        "status": "testing",
+        "kicad_version": "8.0",
+        "download_sha256": "SHA256_HERE",
+        "download_size": DOWNLOAD_SIZE_HERE,
+        "download_url": "DOWNLOAD_URL_HERE",
+        "install_size": INSTALL_SIZE_HERE
+    }]
+}
