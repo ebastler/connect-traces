@@ -86,19 +86,18 @@ class Slanted:
         self.n = y - self.m * x
 
 
-class LineFactory:
-    """Represent a line in 2D space."""
+def line_factory(track: TrackProxy):
+    """Get the correct class."""
 
-    def __init__(self, track: TrackProxy):
-        slope = track.slope
+    slope = track.slope
 
-        if slope == 0:
-            return Horizontal(track)
+    if slope == 0:
+        return Horizontal(track)
 
-        if slope == INF:
-            return Vertical(track)
+    if slope == INF:
+        return Vertical(track)
 
-        return Slanted(track)
+    return Slanted(track)
 
 
 def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Point]:
