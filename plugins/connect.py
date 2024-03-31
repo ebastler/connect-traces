@@ -93,12 +93,12 @@ class LineFactory:
         slope = track.slope
 
         if slope == 0:
-            return self.Horizontal(track)
+            return Horizontal(track)
 
         if slope == INF:
-            return self.Vertical(track)
+            return Vertical(track)
 
-        return self.Slanted(track)
+        return Slanted(track)
 
 
 def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Point]:
