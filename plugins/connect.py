@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Pablo Martinez (elpekenin)
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 import pcbnew as P
 import wx
@@ -14,12 +14,16 @@ THIS = Path(__file__)
 ICON = THIS.parent.resolve() / "connect.png"
 
 
-def error(msg: str):
-    """Show popup with error message and quit with error code."""
-    dlg = wx.MessageDialog(None, msg, "Error", wx.OK | wx.ICON_ERROR)
-    dlg.ShowModal()
-    dlg.Destroy()
-    return 1
+class ConnectExtensionError(Exception):
+    """
+    Custom class to flag errors during execution.
+    They are handled and cause an error message.
+
+    Other (unexpected) problems will still raise ConnectExtensionError the way.
+    """
+
+    def __init__(self, msg: str):
+        self.msg = msg
 
 
 class TrackProxy:
@@ -100,14 +104,29 @@ def line_factory(track: TrackProxy):
     return Slanted(track)
 
 
-def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Point]:
+def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Point:
     """Find the intersection of two tracks."""
 
     line_a = line_factory(track_a)
     line_b = line_factory(track_b)
 
+    def _colinear():
+        """Repeated logic that makes colinear tracks become one."""
+        a_start, a_end, b_start = track_a.start, track_a.end, track_b.start
+
+        if distance(b_start, a_start) < distance(b_start, a_end):
+            return a_start
+        else:
+            return a_end
+
+    # have an exception ready to be raised
+    exc = ConnectExtensionError("Lines are parallel and wont connect.")
+
     if isinstance(line_a, Horizontal) and isinstance(line_b, Horizontal):
-        return None
+        if line_a.y == line_b.y:
+            return _colinear()
+
+        raise exc
 
     elif isinstance(line_a, Horizontal) and isinstance(line_b, Vertical):
         x = line_b.x
@@ -122,7 +141,10 @@ def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Poin
         y = line_b.y
 
     elif isinstance(line_a, Vertical) and isinstance(line_b, Vertical):
-        return None
+        if line_a.x == line_b.x:
+            return _colinear()
+
+        raise exc
 
     elif isinstance(line_a, Vertical) and isinstance(line_b, Slanted):
         x = line_a.x
@@ -141,10 +163,17 @@ def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Poin
         m2, n2 = line_b.m, line_b.n
 
         if m1 == m2:
-            return None
+            if n1 == n2:
+                return _colinear()
+
+            raise exc
 
         x = (n2 - n1) / (m1 - m2)
         y = m1 * x + n1
+
+    # all combinations should be checked already
+    else:
+        raise ConnectExtensionError(f"Unhandled combination: {type(line_a)}, {type(line_b)}")
 
     # points in KiCAD are ints, cast them
     # done here, at the very end, to avoid carrying rounding errors
@@ -177,20 +206,34 @@ class ConnectTraces(P.ActionPlugin):
         self.show_toolbar_button = True
         self.icon_file_name = str(ICON)
 
-    def Run(self):
+    def _run(self):
+        """
+        Actual logic, on a function to easily propagate errors by raising,
+        instead of returning the error info all the stack thru.
+        """
+
         pcb = P.GetBoard()
 
         selected_tracks = [TrackProxy(track) for track in pcb.GetTracks() if track.IsSelected()]
         if len(selected_tracks) != 2:
-            return error("Wrong amount of tracks, must select 2.")
+            raise ConnectExtensionError("Wrong amount of tracks, must select 2.")
 
         a, b = selected_tracks
         if a.layer != b.layer:
-            return error("Tracks are on different layers.")
+            raise ConnectExtensionError("Tracks are on different layers.")
 
         intersection = find_intersection(a, b)
-        if intersection is None:
-            return error("Lines are parallel and wont connect.")
 
         extend_to(a, intersection)
         extend_to(b, intersection)
+
+    def Run(self):
+        """Execute the logic, converting our expected errors into a text box."""
+
+        try:
+            self._run()
+        except ConnectExtensionError as e:
+            dlg = wx.MessageDialog(None, str(e.msg), "Error", wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return 1
