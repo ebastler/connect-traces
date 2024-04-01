@@ -172,7 +172,7 @@ class ConnectTraces(P.ActionPlugin):
         self.category = "Modify PCB"
         self.description = self.__class__.__doc__
         self.show_toolbar_button = True
-        self.icon_file_name = ICON
+        self.icon_file_name = str(ICON)
 
     def Run(self):
         pcb = P.GetBoard()
