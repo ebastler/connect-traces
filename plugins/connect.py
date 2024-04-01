@@ -11,7 +11,7 @@ INF = float("inf")  # slope of a vertical line
 Point = Tuple[int, int]
 
 THIS = Path(__file__)
-ICON = THIS.parent.parent.resolve() / "connect.png"
+ICON = THIS.parent.resolve() / "connect.png"
 
 
 def error(msg: str):
