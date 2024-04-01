@@ -140,6 +140,9 @@ def find_intersection(track_a: TrackProxy, track_b: TrackProxy) -> Optional[Poin
         m1, n1 = line_a.m, line_a.n
         m2, n2 = line_b.m, line_b.n
 
+        if m1 == m2:
+            return None
+
         x = (n2 - n1) / (m1 - m2)
         y = m1 * x + n1
 
